@@ -558,35 +558,6 @@ def engineer_features(data):
     
     return data
 
-# collected bounding box points
-
-umanhattan = [(40.796937, -73.949503),(40.787945, -73.955822),(40.782772, -73.943575),
-              (40.794715, -73.929801),(40.811261, -73.934153),(40.835371, -73.934515),
-              (40.868910, -73.911145),(40.872719, -73.910765),(40.878252, -73.926350),
-              (40.850557, -73.947262),(40.836225, -73.949899),(40.806050, -73.971255)]
-
-poi = Polygon(umanhattan)
-create a function to check if a location is located inside Upper Manhattan
-def is_within_bbox(loc,poi=poi):
-    """
-    This function checks if a location loc with lat and lon is located within the polygon of interest
-    input:
-    loc: tuple, (latitude, longitude)
-    poi: shapely.geometry.Polygon, polygon of interest
-     """
-    return 1*(Point(loc).within(poi))
-
-
-  return the code to create a new features on the dataset
-  There is a bug here that I am trying to fix . error message : Isocalendar not defined .
-  Excepected  the size to change after feature engineering 
-print("Size before feature engineering:", data.shape)
- data = engineer_features(data)
-print("Size after feature engineering:",data.shape)
-
-Size before feature engineering: (1043476, 25)
-Size after feature engineering: (1043476, 25)
-
 # Uncomment to check for data validity. 
 data.describe().T
 
@@ -709,7 +680,7 @@ def test_classification(df, label, y1=[0,50]):
     """
     
     if len(pd.unique(df[label])) == 2: # check if the variable is categorical with only two
-# categories  and run the test .
+ categories  and run the test .
         vals = pd.unique(df[label])
         gp1 =df[df.With_tip == 0][label].value_counts().sort_index()
         gp2 =df[df.With_tip == 1][label].value_counts().sort_index()
@@ -719,7 +690,7 @@ def test_classification(df, label, y1=[0,50]):
         df.boxplot(label, by='With_tip')
         plt.ylim(y)
         plt.show 
-#         print("t-test if, label , can be used to distinguish transaction with tip and without  " )
+         print("t-test if, label , can be used to distinguish transaction with tip and without  " )
         print("results:", ttest_ind(df[df.WIth_tip == 0][label].value, df[df.With_tip ==1][label].values , False))
     else:         
          passs 
@@ -767,8 +738,8 @@ def generate_histogram(df, catName):
 Example of exploration of the Fare_amount using the implemented:
 visualize_contious(data1 , 'Fare_amount', outlier ='on')
 
-![png](images/DistribFAmount.png)
 
+![png](Images/DistribFAmount.png)
 
 
 
