@@ -129,7 +129,7 @@ To the left is plotted the distribution of the entire raw set of Trip distance. 
 
 The hypothesis: The trips are not random. If there were random, we would have a (symmetric) Gaussian distribution. The non-zero autocorrelation may be related the fact that people taking ride are pushed by a common cause, for instance, people rushing to work.
 
-# We are going to examine if the time of the day has any impact on the trip distance. #
+## We are going to examine if the time of the day has any impact on the trip distance. #
 
 First, convert pickup and drop off datetime variable in their specific righ format
 data['lpep_pickup_dt'] = data.lpep_pickup_datetime.apply(lambda x:dt.datetime.strptime(x,"%m/%d/%y %H:%M"))
@@ -299,9 +299,10 @@ To identify trips originating from upper Manhattan :
     *Create a polygon using shapely.geometry.Polygon :[https://pypi.org/project/Shapely/]
     * Check if the polygon contain a location defined by (latitude, longitude)
 
-# import library
+import library
 from shapely.geometry import Point,Polygon,MultiPoint
-# data points that define the bounding box of the Upper Manhattan
+data points that define the bounding box of the Upper Manhattan
+
 U_manhattan = [(40.796937, -73.949503),(40.787945, -73.955822),(40.782772, -73.943575),
               (40.794715, -73.929801),(40.811261, -73.934153),(40.835371, -73.934515),
               (40.868910, -73.911145),(40.872719, -73.910765),(40.878252, -73.926350),
@@ -313,8 +314,9 @@ print(U_manhattan)
 
 
 poi = Polygon(umanhattan)
-# poi
-# # create a function to check if a location is located inside Upper Manhattan
+poi
+
+Create a function to check if a location is located inside Upper Manhattan
 def is_within_bbox(loc,poi=poi):
     """
     This function returns 1 if a location loc(lat,lon) is located inside a polygon of interest poi
@@ -324,7 +326,8 @@ def is_within_bbox(loc,poi=poi):
     return 1*(Point(loc).within(poi))
 tic = dt.datetime.now()
 print(tic)
-# # Create a new variable to check if a trip originated in Upper Manhattan
+
+Create a new variable to check if a trip originated in Upper Manhattan
 data['U_manhattan'] = data[['Pickup_latitude','Pickup_longitude']].apply(lambda r:is_within_bbox((r[0],r[1])),axis=1)
 print("Processing Time :", dt.datetime.now() - tic)
  
@@ -340,8 +343,8 @@ bins = np.histogram(v1,bins=10)[1]
 h1 = np.histogram(v1,bins=bins)
 h2 = np.histogram(v2,bins=bins)
 
-# generate the plot
-# First suplot: visualize all data with outliers
+generate the plot
+First suplot: visualize all data with outliers
 fig,ax = plt.subplots(1,1,figsize=(10,5))
 w = .4*(bins[1]-bins[0])
 ax.bar(bins[:-1],h1[0],width=w,color='r')
@@ -363,6 +366,7 @@ at 95 % level of comfidence
 
 # The Model
 # Summary
+
 The initial dataset contained 1048575 transactions with 21 time-series, categorical and numerical variables. In order to build the final model, four phases were followed (1) data cleaning, (2) feature engineering (3) exploratory data analysis and (4) model creation
 
 The cleaning consisted in drop zero variance variables (Ehail_fee), replacing invalid with the most frequent values in each categorical variable whereas the median was used for continuous numerical variables. Invalid values could be missing values or values not allowed for specific variables as per the dictionary of variables. In this part, variables were also converted in their appropriate format such datetime.
@@ -377,7 +381,7 @@ Note: The code to make predictions is provided in the same directory as tip_pred
 
 # Data Cleaning
 
-# define a function to clean a loaded dataset
+# Define a function to clean a loaded dataset
 
 def clean_data(adata):
     """
@@ -420,30 +424,30 @@ def clean_data(adata):
     data.Tolls_amount = data.Tolls_amount.abs()
     data.MTA_tax = data.MTA_tax.abs()
     
-#     # RateCodeID
+RateCodeID
     indices_oi = data[~((data.RateCodeID>=1) & (data.RateCodeID<=6))].index
     data.loc[indices_oi, 'RateCodeID'] = 2 # 2 = Cash payment was identified as the common method
     print (round(100*len(indices_oi)/float(data.shape[0]),2),"% of values in RateCodeID were invalid.--> Replaced by the most frequent 2")
     
-#     # Extra
+Extra
     indices_oi = data[~((data.Extra==0) | (data.Extra==0.5) | (data.Extra==1))].index
     data.loc[indices_oi, 'Extra'] = 0 # 0 was identified as the most frequent value
     print (round(100*len(indices_oi)/float(data.shape[0]),2),"% of values in Extra were invalid.--> Replaced by the most frequent 0")
     
-#     # Total_amount: the minimum charge is 2.5, so I will replace every thing less than 2.5 by the median 11.76 (pre-obtained in analysis)
+Total_amount: the minimum charge is 2.5, so I will replace every thing less than 2.5 by the median 11.76 (pre-obtained in analysis)
     indices_oi = data[(data.Total_amount<2.5)].index
     data.loc[indices_oi,'Total_amount'] = 11.76
     print (round(100*len(indices_oi)/float(data.shape[0]),2),"% of values in total amount worth <$2.5.--> Replaced by the median 1.76")
     
-    # encode categorical to numeric (I avoid to use dummy to keep dataset small)
+    encode categorical to numeric (I avoid to use dummy to keep dataset small)
     if data.Store_and_fwd_flag.dtype.name != 'int64':
         data['Store_and_fwd_flag'] = (data.Store_and_fwd_flag=='Y')*1
     
-    # rename time stamp variables and convert them to the right format
+    rename time stamp variables and convert them to the right format
     print ("renaming variables...")
     data.rename(columns={'lpep_pickup_datetime':'Pickup_dt','Lpep_dropoff_datetime':'Dropoff_dt'},inplace=True)
     
-    # Converting time stamp to the right format . 
+    Converting time stamp to the right format . 
     print("converting timestamps variables to right format ...")
     
     data['Pickup_dt'] = data.Pickup_dt.apply(lambda x :dt.datetime.strptime(x, "%m/%d/%y  %H:%M"))
@@ -452,7 +456,8 @@ def clean_data(adata):
     print ("Done cleaning")
     
     return data
-# Run code to clean the data
+Run code to clean the data
+
 data = clean_data(data)
 
 Negative values found and replaced by their abs
@@ -471,7 +476,6 @@ Done cleaning
 
 # Feature Engineering 
 
-
 In this step, I intuitively created new varibles derived from current variables.
 
 *Time variables: Week, Month_day(Day of month), Week_day (Day of week), Hour (hour of day), Shift_type (shift period of the day) and Trip_duration.The were created under the hypothesis that people may be willing to tip depending on the week days or time of the day. For instance, people are more friendly and less stressful to easily tip over the weekend. They were derived from pickup time
@@ -479,8 +483,6 @@ In this step, I intuitively created new varibles derived from current variables.
 *.Speed: this the ratio of Trip_distance to Trip_duration. At this level, all entries with speeds higher than 240 mph were dropped since this is the typical highest speed for cars commonly used as taxi in addition to the fact that the speed limit in NYC is 50 mph. An alternative filter threshold would be the highest posted speed limit in NYC but it might be sometimes violated.
 *.With_tip: This is to identify transactions with tips or not. This variable was created after discovering that 60% of transactions have 0 tip.
 *****.As seen that using the mean of trips from Manhattan is different from the mean from other boroughs, this variable can be considered as well in the model building. A further and deep analysis, would be to create a variable of the origin and destination of each trip. This was tried but it was computationally excessive to my system. Here, coming from Manhattan or not, is the only variable to be used.
-
-
 
 # Function to run the feature engineering
 def engineer_features(data):
@@ -506,8 +508,8 @@ def engineer_features(data):
     
     # derive time variables
     print("deriving time variables...")
-#     reference week "First week of Septemeber in 2015" 
-# date(2003, 12, 29).isocalendar()
+     reference week "First week of Septemeber in 2015" 
+     date(2003, 12, 29).isocalendar()
  
     ref_week = dt.datetime(2015,9,1).isocalendar()[1]
   
@@ -517,7 +519,7 @@ def engineer_features(data):
     data.rename(columns ={'Pick_hour':'Hour'} , inplace =True)
     data['Hour'] = data.Pickup_dt.apply(lambda x:x.hour)
     
-#  Create shift variable: 1= (7am to 3 pm) , 2 =(3pm to 11 pm) , 3 = (11 pm to 7 am )
+    Create shift variable: 1= (7am to 3 pm) , 2 =(3pm to 11 pm) , 3 = (11 pm to 7 am )
    
     data['Shift_type']=np.NAN
     data.loc[data[(data.Hour >=7) & (data.Hour<15)].index,'Shift_type'] = 1
@@ -525,66 +527,67 @@ def engineer_features(data):
     data.loc[data[data.Shift_type.isnull()].index,'Shift_type'] = 3
     
 #     Trip Duration 
+
     print("Deriving Trip_duration ....")
     data['Trip_duration'] = ((data.Dropoff_dt - data.Pickup_dt).apply(lambda x:x.total_seconds()/60.))
                   
     print("Deriving direction variables...")
-#     Create direction variables Direction_North_South (NS)
-#     This is 2 if Taxi moving frm North to South , 1 in the opposite direction and = 0 otherwise. 
+    Create direction variables Direction_North_South (NS)
+    This is 2 if Taxi moving frm North to South , 1 in the opposite direction and = 0 otherwise. 
     data['Direction_NS'] = (data.Pickup_latitude > data.Dropoff_latitude)* 1+1 
     indices = data[(data.Pickup_latitude == data.Dropoff_latitude) & (data.Pickup_latitude !=0)].index
     data.loc[indeces, 'Direction_NS'] = 0
-# Create direction variables of Direction_EW(East to West) 
+    Create direction variables of Direction_EW(East to West) 
     data["Direction_EW"] = (data.Pickup_longitude > data.Dropoff_longitude) * 1+1
     indeces = data[(data.Pickup_longitude ==data.Dropoff_longitude) & (data.Pickup_longitude !=0)].index
     data.loc[indeces,'Direction_EW'] = 0 
-# Create a variable for speed 
+    Create a variable for speed 
     print("deriving Speed. make sure to check for possible NANS and inf vals...")
     data['Speed_mph'] = data.Trip_distance / (data.Trip_duration / 60)
-#      replace all NANs values and values > 240mph by values samples from a random distribution of mean 12.9  and standard deviation 
-#      6.8 mph. These Values were extracted from the distribution 
+    replace all NANs values and values > 240mph by values samples from a random distribution of mean 12.9  and standard deviation          6.8 mph. These Values were extracted from the distribution 
     indeces_oi = data[(data.Speed_mph.isnull()) / (data.Speed_mph>240)].index
     data.loc[indeces_oi, 'Speed_mph'] = np.abs(np.random.normal(loc=12.9, scale =6.8, size= len(indices_oi)))
     print("Greate we are done with Feature Engineering ! :-")
-#      Create a new a variable to check if the trip originated in Upper Manhattan 
+    Create a new a variable to check if the trip originated in Upper Manhattan 
     print("Checking where the trip originated")
     data[U_manhattan] = data[['Pickup_latitude','Pickup_longitude']]. apply(lambda r: is_within_bbox((r[0], r[1])), axis=1)
-#     create a tip percentage variable
+     create a tip percentage variable
     data['Tip_percentage'] = 100*data.Tip_amount / data.Total_amount
-#     Create with tip variable 
+    Create with tip variable 
     data['With_tip'] =(data.Tip_percentage > 0)*1 
     
     return data
 
 # collected bounding box points
+
 umanhattan = [(40.796937, -73.949503),(40.787945, -73.955822),(40.782772, -73.943575),
               (40.794715, -73.929801),(40.811261, -73.934153),(40.835371, -73.934515),
               (40.868910, -73.911145),(40.872719, -73.910765),(40.878252, -73.926350),
               (40.850557, -73.947262),(40.836225, -73.949899),(40.806050, -73.971255)]
 
 poi = Polygon(umanhattan)
-# create a function to check if a location is located inside Upper Manhattan
+create a function to check if a location is located inside Upper Manhattan
 def is_within_bbox(loc,poi=poi):
     """
     This function checks if a location loc with lat and lon is located within the polygon of interest
     input:
     loc: tuple, (latitude, longitude)
     poi: shapely.geometry.Polygon, polygon of interest
-#     """
+     """
     return 1*(Point(loc).within(poi))
 
 
-#  return the code to create a new features on the dataset
-#  There is a bug here that I am trying to fix . error message : Isocalendar not defined .
-#  Excepected  the size to change after feature engineering 
+  return the code to create a new features on the dataset
+  There is a bug here that I am trying to fix . error message : Isocalendar not defined .
+  Excepected  the size to change after feature engineering 
 print("Size before feature engineering:", data.shape)
-# data = engineer_features(data)
+ data = engineer_features(data)
 print("Size after feature engineering:",data.shape)
 
 Size before feature engineering: (1043476, 25)
 Size after feature engineering: (1043476, 25)
 
-#  Uncomment to check for data validity. 
+# Uncomment to check for data validity. 
 data.describe().T
 
 ![png](Images/Tdescribe.png)
@@ -602,14 +605,14 @@ Based on the information , the model ca be bult in two steps .
 
 The two distributions look the same however the t-test results in a zero p-value to imply that the two groups are  different at  92% level of confidence.
 
-# Code to compare the two tips_percentage indentifed groups 
-## code to compare the two Tip_percentage identified groups
-# split data in the two groups
+Code to compare the two tips_percentage indentifed groups 
+code to compare the two Tip_percentage identified groups
+split data in the two groups
 
 data1= data [data.Tip_percentage > 0]  
 data2 = data[data.Tip_percentage == 0 ]
 
-# # generate histograms to compare
+generate histograms to compare
 
 fig,ax = plt.subplots(1,2,figsize =(14,4))
 data.Tip_percentage.hist(bins =10,normed=True, ax=ax[0] , color ='r')
@@ -620,14 +623,15 @@ ax[1].set_xlabel('Tip (%)')
 ax[1].set_title('Distribution of Tip (%) - Transaction with tips')
 ax[1].set_ylabel('Group normed count')
 
-# plt.savefig('Question4_target_varc.jpeg',format='jpeg')
+plt.savefig('Question4_target_varc.jpeg',format='jpeg')
 
 plt.show()
 
 ![png](Images/Target_varc.png)
 # Functions For Exploratory Data Analysis 
 def visualize_contious(df, label, method={'type':'histogram','bins':20},outlier ='on'):
-    """
+
+   
     The function to quickly visualize continuos variables 
     df:pandas.dataFrame
     label:str, name of variable to be plotted . it should be present in df.columns
@@ -637,10 +641,10 @@ def visualize_contious(df, label, method={'type':'histogram','bins':20},outlier 
     Outliers are all those points 
     Located at 3 standard deviations further from the mean.
     
-    """
-#     Create Vector of variable of interest 
+    
+# Create Vector of variable of interest 
     v = df[label]
-#     Define     mean and standard deviation
+    Define     mean and standard deviation
     m = v.mean()
     s = v.std()
     fig, ax = plt.subplots (1, 2, figsize=(14,4))
@@ -758,9 +762,9 @@ def generate_histogram(df, catName):
     plt.title ('Distribution of Tip by' + catName )
     plt.xlabel ('Tip (%)')
     
-#     plt.show()
+    plt.show()
     
-# Example of exploration of the Fare_amount using the implemented:
+Example of exploration of the Fare_amount using the implemented:
 visualize_contious(data1 , 'Fare_amount', outlier ='on')
 
 ![png](images/DistribFAmount.png)
