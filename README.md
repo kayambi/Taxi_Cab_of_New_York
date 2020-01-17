@@ -883,6 +883,7 @@ Starting with continuous variables, two main insights were discovered: A lognorm
 #Example of exploration of the Fare_amount using the implemented:
 visualize_contious(data1 , 'Fare_amount', outlier ='on')
 
+```
 
 ![png](Images/duration_cluster.png)
 
