@@ -2,12 +2,12 @@
 
 ![x](Images/Boro-Taxi-4.png)
 
-Conntents of the repo 
+Contents of the repo 
 
 1 .[The report](https://github.com/kayambi/Taxi_Cab_of_New_York/blob/master/README.md) in .md format in the subdir/Taxi_Cab_of_New_York/Taxi_Cab_of_New_York.md 
 
 
-** Note:** This entire repo is available on my Demo 
+2. New York City Green Taxi ipython notebook[Transportation project work in  progress.ipynb](https://github.com/kayambi/Taxi_Cab_of_New_York/blob/master/DataSet/LFS%20(Large%20FIle%20Storage%20)%20working%20progress%20!!!!.ipynb)
 
 
 ```Python
@@ -38,9 +38,11 @@ warnings.filterwarnings('ignore')
 !pip install git-lfs
 from scipy.stats import chisquare 
 
+
 # Analysis
 
 In this notebook, I will explore data on New York City Green Taxi of [september 2015](http://www.nyc.gov/html/tlc/html/about/trip_record_data.shtml). I will start with some warm up questions about the dataset. Later, I will build a model to predict the percentage tip a driver would exepect on each trip. The code is fully written in python with few additional open-source libraries easy to install. 
+
 - [shapely](https://pypi.python.org/pypi/Shapely)
 - [scikit learn](http://scikit-learn.org/stable/)
 - [tabulate](http://txt.arboreus.com/2013/03/13/pretty-print-tables-in-python.html)
@@ -48,11 +50,16 @@ In this notebook, I will explore data on New York City Green Taxi of [september 
 In this analysis, some notion of statistics and hypothesis test are used but are very easy to follow. This [handbook of statistics](http://www.biostathandbook.com/index.html) can be used as a reference to explain basics.
 
 
-## Start With Warm up
+# Start With Warm up
 
-# Firs Step . Download Dataset and Print out the size. 
+*** Firs Step . Download Dataset and Print out the size. ***
+
+``` python
+
+# Download the september 2019 dataset 
+
 if os.path.exists('Data_Sptember.csv'):# check if the Data is present and load it . 
-    data= pd.read_csv('Data_Sptember.csv')
+    data= pd.read_csv('Data_Sptember.csv') 
 # else: # Download Data Jan if not available on desktop . 
 #     url = "https://s3.amazonaws.com/nyc-tlc/trip+data/green_tripdata_2019-01.csv"
 #     data= pd.read_url('url')
@@ -125,26 +132,29 @@ plt.show()
 
 The Trip Distance is asymmetrically distributed.It is skewed to the right and it has a median smaller than it`s mean and both smaller than the standard deviation. The skewness is due to the fact that the variable has a lower boundary of 0.The distance can't be negative. https://www.itl.nist.gov/div898/handbook/eda/section3/eda3669.htm
 
-To the left is plotted the distribution of the entire raw set of Trip distance. To the right, outliers have been removed before plotting. Outliers are defined as any point located further than 3 standard deviations from the mean
+To the left is plotted the distribution of the entire raw set of Trip distance. To the right, outliers have been removed before plotting. *Outliers are defined as any point located further than 3 standard deviations from the mean* 
 
-The hypothesis: The trips are not random. If there were random, we would have a (symmetric) Gaussian distribution. The non-zero autocorrelation may be related the fact that people taking ride are pushed by a common cause, for instance, people rushing to work.
+** The hypothesis:** The trips are not random. If there were random, we would have a (symmetric) Gaussian distribution. The non-zero autocorrelation may be related the fact that people taking ride are pushed by a common cause, for instance, people rushing to work.
 
-## We are going to examine if the time of the day has any impact on the trip distance. #
+*** We are going to examine if the time of the day has any impact on the trip distance ***
 
-First, convert pickup and drop off datetime variable in their specific righ format
+```python 
+
+#First, convert pickup and drop off datetime variable in their specific right format
+
 data['lpep_pickup_dt'] = data.lpep_pickup_datetime.apply(lambda x:dt.datetime.strptime(x,"%m/%d/%y %H:%M"))
 data['lpep_dropoff_dt'] = data.	Lpep_dropoff_datetime.apply(lambda x:dt.datetime.strptime(x,"%m/%d/%y %H:%M"))
 
-Second, create a variable for pickup hours
+# Second, create a variable for pickup hours
 data['Pickup_hour'] = data.lpep_pickup_dt.apply(lambda x:x.hour)
 
-Mean and Median of trip distance by pickup hour
-I will generate the table but also generate a plot for a better visualization
+# Mean and Median of trip distance by pickup hour
+# I will generate the table but also generate a plot for a better visualization
 
 fig,ax = plt.subplots(1,1,figsize=(9,5)) # prepare fig to plot mean and median values
-use a pivot table to aggregate Trip_distance by hour
+# use a pivot table to aggregate Trip_distance by hour
 table1 = data.pivot_table(index='Pickup_hour', values='Trip_distance',aggfunc=('mean','median')).reset_index()
-rename columns
+# rename columns
 table1.columns = ['Hour','Mean_distance','Median_distance']
 table1[['Mean_distance','Median_distance']].plot(ax=ax)
 plt.ylabel('Metric (miles)')
@@ -156,12 +166,12 @@ plt.savefig('Question3_1.jpeg',format='jpeg')
 plt.show()
 print ('-----Trip distance by hour of the day-----\n')
 print (tabulate(table1.values.tolist(),["Hour","Mean distance","Median distance"]))
-
-![png](Images/Trip_Distribution.png)
+ 
+![png](Images/Trip_Distribution.png)                                                          
 
 -----Trip distance by hour of the day-----
 
-  Hour    Mean distance    Median distance
+  Hour    Mean distance    Median distance                                
 ------  ---------------  -----------------
      0          3.1677               2.23
      1          3.0324               2.14
@@ -188,15 +198,48 @@ print (tabulate(table1.values.tolist(),["Hour","Mean distance","Median distance"
     22          3.24032              2.22
     23          3.26282              2.26
 
+
+![png](Images/Trip_Distribution1.png)
+
+-----Trip distance by hour of the day-----
+
+  Hour    Mean distance    Median distance
+------  ---------------  -----------------
+     0          3.29074              2.3
+     1          3.15925              2.22
+     2          3.14788              2.22
+     3          3.21088              2.275
+     4          3.45483              2.39
+     5          4.19538              2.91
+     6          3.97609              2.8
+     7          3.25145              2.1
+     8          2.97537              1.9
+     9          3.06321              2.02
+    10          3.0371               2
+    11          2.87525              1.87
+    12          2.90718              1.9
+    13          2.88218              1.86
+    14          2.76009              1.8
+    15          2.78375              1.8
+    16          2.78264              1.8
+    17          2.71911              1.77
+    18          2.69802              1.8
+    19          2.78718              1.88
+    20          2.80607              1.91
+    21          2.97203              2.03
+    22          3.17881              2.2
+    23          3.29715              2.3
+
 -> We observe long range trips in the morning and evenings. Are these people commuting to work? If so how do they get back home. The evening peak are shorter than the morning peak. I would hypothesize that people are okay to take cabs in the morning to avoid being late to their early appointments while they would take public transportation in the evening. However, this might not apply to NYC
 
 ***Let's also compare trips that originate (or terminate) from (at) one of the NYC airports. We can look at how many they are, the average fair, ...***
 
-Reading through the dictionary of variables, I found that the variable RateCodeID contains values indicating the final rate that was applied. Among those values, I realized that there is Newark and JFK which are the major airports in New York. In this part, I will use this knowledge and group data with RateCodeID 2 (JFK) and 3 (Newark). - An alternative (which I didn't due to time constraint) is to (1) get coordinates of airports from google map or http://transtats.bts.gov (2) get at least 4 points defining a rectangular buffer zone near the airport (3) build a polygon shape using shapely [https://pypi.python.org/pypi/Shapely] and (3) check if any pickup/dropoff location coordinates is within the polygon using shapely again. This method was first tried but was found to be time consuming -
+Reading through the dictionary of variables, I found that the variable RateCodeID contains values indicating the final rate that was applied. Among those values, I realized that there is Newark and JFK which are the major airports in New York. In this part, I will use this knowledge and group data with RateCodeID 2 (JFK) and 3 (Newark). - An alternative (which I didn't due to time constraint) is to (1) get coordinates of airports from google map or http://transtats.bts.gov (2) get at least 4 points defining a rectangular buffer zone near the airport (3) build a polygon shape using shapely [https://pypi.python.org/pypi/Shapely] and (3) check if any pickup/drop-off location coordinates is within the polygon using shapely again. This method was first tried but was found to be time consuming -
 
 ``` python
  
-# Selecting airpor trips, finding the average of fare per trip, total amount charged. 
+# Selecting airport trips, finding the average of fare per trip, total amount charged.
+ 
 airports_trips = data[(data.RateCodeID== 1) | (data.RateCodeID == 3)]
 print("Number of Trips to/ from NYC airports :" ,airports_trips.shape[0])
 print("Average of Fare (calculated by meter) of trips to / from NYC airports: $ ",airports_trips.Fare_amount.mean(),"per trip")
@@ -225,13 +268,13 @@ v2 = data.loc[~data.index.isin (v1.index),'Trip_distance'] # non- airport trips
 v1 = v1[~((v1-v1.mean()).abs()>2*v1.std())]
 v2 = v2[~((v2-v2.mean ()).abs()>2*v2.std())]
 
-# # Define Bins bounries.
+# Define Bins boundries.
 
 bins = np.histogram(v1, normed = True)[1]
 h1 = np.histogram(v1, bins = bins , normed = True)
 h2 = np.histogram(v2 , bins = bins , normed =True)
 
-# # plots distribution of trips distance normilized among groups 
+# # plot distribution of trips distance within groups 
 
 fig,ax = plt.subplots(1,2,figsize = (15,5))
 w =.4 *(bins[1] - bins[0])
@@ -242,7 +285,9 @@ ax[0].set_xlabel('Trip Distance(miles)')
 ax[0].set_ylabel('Group Normalized Trips Count')
 ax[0].set_title('A. Trip Distance Distribution')
 
-#  Plot Hour Distribution  
+# ax[0].set_yscale('log')
+
+# Plot hourly distribution 
 
 airports_trips.Pickup_hour.value_counts(normalize=True).sort_index().plot(ax=ax[1])
 data.loc[~data.index.isin(v1.index),'Pickup_hour'].value_counts(normalize=True).sort_index().plot(ax=ax[1])
@@ -254,6 +299,8 @@ ax[1].legend(['Airport trips','Non-airport trips'],loc='best',title='group')
 plt.show()
 
 ```
+
+
 ![png](Images/Hour_Dist.png)
 
 
@@ -261,27 +308,31 @@ A . The trip distance distribution shows two peaks . Airport trips follow
 the same trend as the rest of trips for short trips (trip distance less than or equal 2 miles).
 However , there is also an increased number for long range trips (18 miles) which might 
 correspond to a great number people coming to airports from further residential areas . 
-A. check on a google map shows that the distance between JFK and Manhattan is about 18 miles whereas Newark to Manhattan is 15 miles . 
+A check on a google map shows that the distance between JFK and Manhattan is about 18 miles whereas Newark to Manhattan is 15 miles. 
 
-B. The hourly distribution shows that the number of trips at airports peaks around 3 Pm while it peaks 2 hours later .
+B.The hourly distribution shows that the number of trips at airports peaks around 3 Pm while it peaks 2 hours later .
 on other hand , there is shortage in airports riders at 2 Am while the rest of NYC goes completely down 3 hours later at 5 AM .
 
-# Predictive model
+## Predictive model
 
 In this section , I will take you through my analysis towards building a model to predict the percentage trip.
 
-1. Let's build a derived variable for tips for a percentage of the total fare. 
+*** 1 . Let's build a derived variable for tips for a percentage of the total fare.***
 
 Before we proceed with this , some cleaning are necessary . Since the initial charge for NYC green is $2.5 , 
 any transaction with a smal total amount is invalid , thus it to be dropped. 
 
+``` python 
 
-data = data[(data.Total_amount >= 2.5)] # Cleaning 
+data = data[(data.Total_amount >= 2.5)] 
+
+# Cleaning
+ 
 data["Tip_percentage"] = 100 * data.Total_amount / data.Total_amount 
 print("Summary: Tip_percentage \n", data.Tip_percentage.describe())
 
 Summary: Tip_percentage 
- count    1.043476e+06
+count    1.043476e+06
 mean     1.000000e+02
 std      1.277300e-15
 min      1.000000e+02
@@ -291,49 +342,57 @@ min      1.000000e+02
 max      1.000000e+02
 Name: Tip_percentage, dtype: float64
 
-2 . Similarly to the comparison between trips to /from airports with the rest of trips , it is worthy to spend more time and check wether trips originating from Upper Manhattan have different percentage tip.
+***2. Similarly to the comparison between trips to /from airports with the rest of trips , it is worthy to spend more time and check wether trips originating from Upper Manhattan have different percentage tip.***
 
 To identify trips originating from upper Manhattan : 
-    * From google map , collect latitude and longitude data of atleast 12 points that approximately define 
+    -From google map , collect latitude and longitude data of atleast 12 points that approximately define 
     the bounding box of upper Manhattan . 
-    *Create a polygon using shapely.geometry.Polygon :[https://pypi.org/project/Shapely/]
-    * Check if the polygon contain a location defined by (latitude, longitude)
+    -Create a polygon using shapely.geometry.Polygon :[https://pypi.org/project/Shapely/]
+    - Check if the polygon contain a location defined by (latitude, longitude)
 
-import library
+``` python 
+
+# import library
+
 from shapely.geometry import Point,Polygon,MultiPoint
-data points that define the bounding box of the Upper Manhattan
+# data points that define the bounding box of the Upper Manhattan
 
 U_manhattan = [(40.796937, -73.949503),(40.787945, -73.955822),(40.782772, -73.943575),
               (40.794715, -73.929801),(40.811261, -73.934153),(40.835371, -73.934515),
               (40.868910, -73.911145),(40.872719, -73.910765),(40.878252, -73.926350),
               (40.850557, -73.947262),(40.836225, -73.949899),(40.806050, -73.971255)]
-print(U_manhattan)
-
-
-[(40.796937, -73.949503), (40.787945, -73.955822), (40.782772, -73.943575), (40.794715, -73.929801), (40.811261, -73.934153), (40.835371, -73.934515), (40.86891, -73.911145), (40.872719, -73.910765), (40.878252, -73.92635), (40.850557, -73.947262), (40.836225, -73.949899), (40.80605, -73.971255)]
-
 
 poi = Polygon(umanhattan)
 poi
 
-Create a function to check if a location is located inside Upper Manhattan
+# Create a function to check if a location is located inside Upper Manhattan
 def is_within_bbox(loc,poi=poi):
+
     """
     This function returns 1 if a location loc(lat,lon) is located inside a polygon of interest poi
     loc: tuple, (latitude, longitude)
     poi: shapely.geometry.Polygon, polygon of interest
     """
+
     return 1*(Point(loc).within(poi))
 tic = dt.datetime.now()
 print(tic)
 
-Create a new variable to check if a trip originated in Upper Manhattan
+# Create a new variable to check if a trip originated in Upper Manhattan
 data['U_manhattan'] = data[['Pickup_latitude','Pickup_longitude']].apply(lambda r:is_within_bbox((r[0],r[1])),axis=1)
 print("Processing Time :", dt.datetime.now() - tic)
- 
+
+ ```
 
 2019-12-31 13:10:37.111900
 Processing Time : 0:00:49.209181
+
+- Compare distributions of the two groups 
+
+``` python 
+
+# Create a vector to contain Tip 
+
 
 v1 = data[(data.U_manhattan== 0) & (data.Tip_amount>0)].Tip_amount
 v2 = data[(data.U_manhattan==1) & (data.Tip_amount>0)].Tip_amount
@@ -343,7 +402,7 @@ bins = np.histogram(v1,bins=10)[1]
 h1 = np.histogram(v1,bins=bins)
 h2 = np.histogram(v2,bins=bins)
 
-generate the plot
+# generate the plot
 First suplot: visualize all data with outliers
 fig,ax = plt.subplots(1,1,figsize=(10,5))
 w = .4*(bins[1]-bins[0])
@@ -357,6 +416,8 @@ ax.legend(['Non-Manhattan','Manhattah'],title='origin')
 plt.show()
 print ('t-test results:', ttest_ind(v1,v2,equal_var=False))
 
+```
+
 ![png](Images/Origin_Tip.png)
 
 t-test results: Ttest_indResult(statistic=47.12962151545506, pvalue=0.0)
@@ -364,8 +425,8 @@ t-test results: Ttest_indResult(statistic=47.12962151545506, pvalue=0.0)
 Then two distribution look the same however the t-test results in zero p-value to imply tha the groups are different 
 at 95 % level of comfidence 
 
-# The Model
-# Summary
+###  The Model
+###  Summary
 
 The initial dataset contained 1048575 transactions with 21 time-series, categorical and numerical variables. In order to build the final model, four phases were followed (1) data cleaning, (2) feature engineering (3) exploratory data analysis and (4) model creation
 
@@ -377,10 +438,25 @@ During the exploration, each variable was carefully analyzed and compared to oth
 
 With lack of linear relationship between independent and depend variables, the predictive model was built on top of the random forest regression and gradient boosting classifier algorithms implemented in sklearn after routines to optimize best parameters. A usable script to make predictions as attached to this notebook and available in the same directory.
 
-Note: The code to make predictions is provided in the same directory as tip_predictor.py and the instructions are in the recommendation part of this section.
+**Note:** The code to make predictions is provided in the same directory as tip_predictor.py and the instructions are in the recommendation part of this section.
 
-# Data Cleaning
+Following,each part of the analysis fully explained with accompanying python code 
+ 
+### 1 Data Cleaning
 
+This part concerns work Done to treat invalid data.
+- Ehail_fee was removed since 99% of the data are missing 
+- Missing values in trip_type were replaced with the most common value that was 1 
+-Invalid data were found in :
+    -RateCodeID: about 0.01 % of the values were 99 . These were replaced by the most common value 2 
+    - Extra : 0.08% of the transactions had negative Extra. These were replaced by 0 as the most frequent 
+   - Total_amount , Fare_amount , improvement_surcharge , Tip_amount : 0.16% of values were negative . The cases were considered as being machine errors during the data entry . They were replaced by their absolute values . Furthermore, as the minimum Total_amount that is chargeable for any service is $ 2.5,, every transaction falling below that amount was replaced by the median value of the Total_amount 11.76. 
+
+
+The code is proved below 
+
+```python 
+  
 # Define a function to clean a loaded dataset
 
 def clean_data(adata):
@@ -409,6 +485,7 @@ def clean_data(adata):
     
     ## replace all values that are not allowed as per the variable dictionary with the most frequent allowable value
     # remove negative values from Total amound and Fare_amount
+
     print ("Negative values found and replaced by their abs")
     print ("Total_amount", 100*data[data.Total_amount<0].shape[0]/float(data.shape[0]),"%")
     print ("Fare_amount", 100*data[data.Fare_amount<0].shape[0]/float(data.shape[0]),"%")
@@ -424,26 +501,27 @@ def clean_data(adata):
     data.Tolls_amount = data.Tolls_amount.abs()
     data.MTA_tax = data.MTA_tax.abs()
     
-RateCodeID
+# RateCodeID
     indices_oi = data[~((data.RateCodeID>=1) & (data.RateCodeID<=6))].index
-    data.loc[indices_oi, 'RateCodeID'] = 2 # 2 = Cash payment was identified as the common method
+    data.loc[indices_oi, 'RateCodeID'] = 2 
+# 2 = Cash payment was identified as the common method
     print (round(100*len(indices_oi)/float(data.shape[0]),2),"% of values in RateCodeID were invalid.--> Replaced by the most frequent 2")
     
-Extra
+# Extra
     indices_oi = data[~((data.Extra==0) | (data.Extra==0.5) | (data.Extra==1))].index
     data.loc[indices_oi, 'Extra'] = 0 # 0 was identified as the most frequent value
     print (round(100*len(indices_oi)/float(data.shape[0]),2),"% of values in Extra were invalid.--> Replaced by the most frequent 0")
     
-Total_amount: the minimum charge is 2.5, so I will replace every thing less than 2.5 by the median 11.76 (pre-obtained in analysis)
+# Total_amount: the minimum charge is 2.5, so I will replace every thing less than 2.5 by the median 11.76 (pre-obtained in analysis)
     indices_oi = data[(data.Total_amount<2.5)].index
     data.loc[indices_oi,'Total_amount'] = 11.76
     print (round(100*len(indices_oi)/float(data.shape[0]),2),"% of values in total amount worth <$2.5.--> Replaced by the median 1.76")
     
-    encode categorical to numeric (I avoid to use dummy to keep dataset small)
+#Encode categorical to numeric (I avoid to use dummy to keep dataset small)
     if data.Store_and_fwd_flag.dtype.name != 'int64':
         data['Store_and_fwd_flag'] = (data.Store_and_fwd_flag=='Y')*1
     
-    rename time stamp variables and convert them to the right format
+#Rename time stamp variables and convert them to the right format
     print ("renaming variables...")
     data.rename(columns={'lpep_pickup_datetime':'Pickup_dt','Lpep_dropoff_datetime':'Dropoff_dt'},inplace=True)
     
@@ -456,10 +534,12 @@ Total_amount: the minimum charge is 2.5, so I will replace every thing less than
     print ("Done cleaning")
     
     return data
-Run code to clean the data
+```python 
+
+#Run code to clean the data
 
 data = clean_data(data)
-
+```
 Negative values found and replaced by their abs
 Total_amount 0.0 %
 Fare_amount 0.0 %
@@ -474,15 +554,17 @@ renaming variables...
 converting timestamps variables to right format ...
 Done cleaning
 
-# Feature Engineering 
+### 2 Feature Engineering 
 
-In this step, I intuitively created new varibles derived from current variables.
+In this step, I intuitively created new variables derived from current variables.
 
-*Time variables: Week, Month_day(Day of month), Week_day (Day of week), Hour (hour of day), Shift_type (shift period of the day) and Trip_duration.The were created under the hypothesis that people may be willing to tip depending on the week days or time of the day. For instance, people are more friendly and less stressful to easily tip over the weekend. They were derived from pickup time
-*.Trip directions: Direction_NS (is the cab moving Northt to South?) and Direction_EW (is the cab moving East to West). These are components of the two main directions, horizontal and vertical. The hypothesis is that the traffic may be different in different directions and it may affect the riders enthousiasm to tipping. They were derived from pickup and dropoff coordinates
-*.Speed: this the ratio of Trip_distance to Trip_duration. At this level, all entries with speeds higher than 240 mph were dropped since this is the typical highest speed for cars commonly used as taxi in addition to the fact that the speed limit in NYC is 50 mph. An alternative filter threshold would be the highest posted speed limit in NYC but it might be sometimes violated.
-*.With_tip: This is to identify transactions with tips or not. This variable was created after discovering that 60% of transactions have 0 tip.
-*****.As seen that using the mean of trips from Manhattan is different from the mean from other boroughs, this variable can be considered as well in the model building. A further and deep analysis, would be to create a variable of the origin and destination of each trip. This was tried but it was computationally excessive to my system. Here, coming from Manhattan or not, is the only variable to be used.
+-Time variables: Week, Month_day(Day of month), Week_day (Day of week), Hour (hour of day), Shift_type (shift period of the day) and Trip_duration.The were created under the hypothesis that people may be willing to tip depending on the week days or time of the day. For instance, people are more friendly and less stressful to easily tip over the weekend. They were derived from pickup time
+-Trip directions: Direction_NS (is the cab moving North to South?) and Direction_EW (is the cab moving East to West). These are components of the two main directions, horizontal and vertical. The hypothesis is that the traffic may be different in different directions and it may affect the riders enthusiasm to tipping. They were derived from pickup and drop-off coordinates
+-Speed: this the ratio of Trip_distance to Trip_duration. At this level, all entries with speeds higher than 240 mph were dropped since this is the typical highest speed for cars commonly used as taxi in addition to the fact that the speed limit in NYC is 50 mph. An alternative filter threshold would be the highest posted speed limit in NYC but it might be sometimes violated.
+-With_tip: This is to identify transactions with tips or not. This variable was created after discovering that 60% of transactions have 0 tip.
+-As seen that using the mean of trips from Manhattan is different from the mean from other boroughs, this variable can be considered as well in the model building. A further and deep analysis, would be to create a variable of the origin and destination of each trip. This was tried but it was computationally excessive to my system. Here, coming from Manhattan or not, is the only variable to be used.
+
+```python 
 
 # Function to run the feature engineering
 def engineer_features(data):
@@ -519,21 +601,21 @@ def engineer_features(data):
     data.rename(columns ={'Pick_hour':'Hour'} , inplace =True)
     data['Hour'] = data.Pickup_dt.apply(lambda x:x.hour)
     
-    Create shift variable: 1= (7am to 3 pm) , 2 =(3pm to 11 pm) , 3 = (11 pm to 7 am )
+   # Create shift variable: 1= (7am to 3 pm) , 2 =(3pm to 11 pm) , 3 = (11 pm to 7 am )
    
     data['Shift_type']=np.NAN
     data.loc[data[(data.Hour >=7) & (data.Hour<15)].index,'Shift_type'] = 1
     data.loc[data[(data.Hour >=15) & (data.Hour<23)].index,'Shift_type'] = 2
     data.loc[data[data.Shift_type.isnull()].index,'Shift_type'] = 3
     
-#     Trip Duration 
+   # Trip Duration 
 
     print("Deriving Trip_duration ....")
     data['Trip_duration'] = ((data.Dropoff_dt - data.Pickup_dt).apply(lambda x:x.total_seconds()/60.))
                   
     print("Deriving direction variables...")
-    Create direction variables Direction_North_South (NS)
-    This is 2 if Taxi moving frm North to South , 1 in the opposite direction and = 0 otherwise. 
+    # Create direction variables Direction_North_South (NS)
+    #This is 2 if Taxi moving frm North to South , 1 in the opposite direction and = 0 otherwise. 
     data['Direction_NS'] = (data.Pickup_latitude > data.Dropoff_latitude)* 1+1 
     indices = data[(data.Pickup_latitude == data.Dropoff_latitude) & (data.Pickup_latitude !=0)].index
     data.loc[indeces, 'Direction_NS'] = 0
@@ -541,49 +623,97 @@ def engineer_features(data):
     data["Direction_EW"] = (data.Pickup_longitude > data.Dropoff_longitude) * 1+1
     indeces = data[(data.Pickup_longitude ==data.Dropoff_longitude) & (data.Pickup_longitude !=0)].index
     data.loc[indeces,'Direction_EW'] = 0 
-    Create a variable for speed 
+    # Create a variable for speed 
     print("deriving Speed. make sure to check for possible NANS and inf vals...")
     data['Speed_mph'] = data.Trip_distance / (data.Trip_duration / 60)
-    replace all NANs values and values > 240mph by values samples from a random distribution of mean 12.9  and standard deviation          6.8 mph. These Values were extracted from the distribution 
+    # replace all NANs values and values > 240mph by values samples from a random distribution of mean 12.9  and standard deviation          6.8 mph. These Values were extracted from the distribution 
     indeces_oi = data[(data.Speed_mph.isnull()) / (data.Speed_mph>240)].index
     data.loc[indeces_oi, 'Speed_mph'] = np.abs(np.random.normal(loc=12.9, scale =6.8, size= len(indices_oi)))
     print("Greate we are done with Feature Engineering ! :-")
     Create a new a variable to check if the trip originated in Upper Manhattan 
     print("Checking where the trip originated")
     data[U_manhattan] = data[['Pickup_latitude','Pickup_longitude']]. apply(lambda r: is_within_bbox((r[0], r[1])), axis=1)
-     create a tip percentage variable
+    # Create a tip percentage variable
     data['Tip_percentage'] = 100*data.Tip_amount / data.Total_amount
-    Create with tip variable 
+    # Create with tip variable 
     data['With_tip'] =(data.Tip_percentage > 0)*1 
     
     return data
 
+# collected bounding box points
+
+umanhattan = [(40.796937, -73.949503),(40.787945, -73.955822),(40.782772, -73.943575),
+              (40.794715, -73.929801),(40.811261, -73.934153),(40.835371, -73.934515),
+              (40.868910, -73.911145),(40.872719, -73.910765),(40.878252, -73.926350),
+              (40.850557, -73.947262),(40.836225, -73.949899),(40.806050, -73.971255)]
+
+poi = Polygon(umanhattan)
+# create a function to check if a location is located inside Upper Manhattan
+def is_within_bbox(loc,poi=poi):
+    """
+    This function checks if a location loc with lat and lon is located within the polygon of interest
+    input:
+    loc: tuple, (latitude, longitude)
+    poi: shapely.geometry.Polygon, polygon of interest
+    """
+    return 1*(Point(loc).within(poi))
+
+
+```
+
+```python 
+
+# run the code to create new features on the dataset
+
+print "size before feature engineering:", data.shape
+data = engineer_features(data)
+print "size after feature engineering:", data.shape
+```
+
+    size before feature engineering: (1494926, 20)
+    deriving time variables...
+    deriving Trip_duration...
+    deriving direction variables...
+    deriving Speed. Make sure to check for possible NaNs and Inf vals...
+    Feature engineering done! :-)
+    checking where the trip originated...
+    size after feature engineering: (1494926, 32)
+
+``` python 
+
 # Uncomment to check for data validity. 
+
+
 data.describe().T
 
 ![png](Images/Tdescribe.png)
 
-# Exploratory Data Analysis 
+```
+
+### 3 .Exploratory Data Analysis 
 
 This was the key phase of the analysis . A look at the distribution of the target
 variable , Tip_percentage showed that 60 % of all transaction did not give tip(See Figure below , left).
 A second tip at 18 % corresponds to the usual NYC customary 
 gratuity rate which fluctuates between 18 % and 25 % (See Figure below , right).
-Based on the information , the model ca be bult in two steps . 
+Based on the information , the model can be built in two steps . 
 
-* First Step: Create classification model to predict wether tip will be given or not . Here a new variable " with_tip" of 1 (if there is tip ) and 0 (otherwise) was created. 
+1.First Step: Create classification model to predict wether tip will be given or not . Here a new variable " with_tip" of 1 (if there is tip ) and 0 (otherwise) was created. 
 * Second Create regression model for transaction with non-zero tip. 
 
-The two distributions look the same however the t-test results in a zero p-value to imply that the two groups are  different at  92% level of confidence.
+2.The two distributions look the same however the t-test results in a zero p-value to imply that the two groups are  different at  92% level of confidence.
 
-Code to compare the two tips_percentage indentifed groups 
+```python 
+
+
+##Code to compare the two tips_percentage indentifed groups 
 code to compare the two Tip_percentage identified groups
-split data in the two groups
+# split data in the two groups
 
 data1= data [data.Tip_percentage > 0]  
 data2 = data[data.Tip_percentage == 0 ]
 
-generate histograms to compare
+# generate histograms to compare
 
 fig,ax = plt.subplots(1,2,figsize =(14,4))
 data.Tip_percentage.hist(bins =10,normed=True, ax=ax[0] , color ='r')
@@ -597,8 +727,14 @@ ax[1].set_ylabel('Group normed count')
 plt.savefig('Question4_target_varc.jpeg',format='jpeg')
 
 plt.show()
+```
 
-![png](Images/Target_varc.png)
+![png](Images/DistribFAmount.png)
+
+Next, each variable distribution and its relationship with the Tip percentage were explored. Few functions were implemented to quickly explore those variables:
+
+```python 
+
 # Functions For Exploratory Data Analysis 
 def visualize_contious(df, label, method={'type':'histogram','bins':20},outlier ='on'):
 
@@ -613,11 +749,13 @@ def visualize_contious(df, label, method={'type':'histogram','bins':20},outlier 
     Located at 3 standard deviations further from the mean.
     
     
-# Create Vector of variable of interest 
+    # Create Vector of variable of interest 
     v = df[label]
-    Define     mean and standard deviation
+    #Define mean and standard deviation
     m = v.mean()
     s = v.std()
+    #Prepare the figure
+
     fig, ax = plt.subplots (1, 2, figsize=(14,4))
     ax[0].set_title('Distribution of' + label)
     ax[1].set_title('Tip % by '+ label)
@@ -635,6 +773,7 @@ def visualize_contious(df, label, method={'type':'histogram','bins':20},outlier 
     ax[0].set_ylabel('Count')
     ax[1].set_ylabel('Tip (%)') 
     
+
 def visualize_categories(df, CatName ,chart_type = 'Histogram',ylimit =[None,None]):
     
     """
@@ -734,8 +873,14 @@ def generate_histogram(df, catName):
     plt.xlabel ('Tip (%)')
     
     plt.show()
+``` 
+Starting with continuous variables, two main insights were discovered: A lognormal-like or power law distribution of the Fare amount and a non-linear function of the tip percentage as function of the total amount. The tip percentage decreases as the fare amount increases but converges around 20%. The density of scattered points implies that there is a high frequency of smaller tipps at low Fare_amount. Can we say that people restrain themselves to tipping more money as the cost of the ride becomes more and more expensive? Or since the fare grows with the length of the trip and trip duration, can we say that riders get bored and don't appreciate the service they are getting? Many questsions can be explored at this point
+
+```python 
+
+
     
-Example of exploration of the Fare_amount using the implemented:
+#Example of exploration of the Fare_amount using the implemented:
 visualize_contious(data1 , 'Fare_amount', outlier ='on')
 
 
