@@ -301,7 +301,6 @@ plt.show()
 
 ```
 
-
 ![png](Images/Hour_Dist.png)
 
 
@@ -885,7 +884,7 @@ Starting with continuous variables, two main insights were discovered: A lognorm
 visualize_contious(data1 , 'Fare_amount', outlier ='on')
 
 
-![png](Images/DistribFAmount.png)
+![png](Images/duration_cluster.png)
 
 
 
