@@ -167,7 +167,7 @@ plt.show()
 print ('-----Trip distance by hour of the day-----\n')
 print (tabulate(table1.values.tolist(),["Hour","Mean distance","Median distance"]))
  
-![png](Images/Trip_Distribution.png)                                                          
+![png](Images/TripDistribution.png)                                                          
 
 -----Trip distance by hour of the day-----
 
