@@ -166,6 +166,7 @@ plt.savefig('Question3_1.jpeg',format='jpeg')
 plt.show()
 print ('-----Trip distance by hour of the day-----\n')
 print (tabulate(table1.values.tolist(),["Hour","Mean distance","Median distance"]))
+```
  
 ![png](Images/TripDistribution.png)                                                          
 
