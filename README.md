@@ -7,8 +7,7 @@ Contents of the repo
 1 .[The report](https://github.com/kayambi/Taxi_Cab_of_New_York/blob/master/README.md) in .md format in the subdir/Taxi_Cab_of_New_York/Taxi_Cab_of_New_York.md 
 
 
-2. New York City Green Taxi ipython notebook[Transportation project work in progress.ipynb](https://github.com/kayambi/Transportation project work in progress .ipynb	/blob/master/DataSet/LFS%20(Large%20FIle%20Storage%20)%20working%20progress%20!!!!.ipynb)
-
+2. New York City Green Taxi notebook[Transportation project work in progress.ipynb](https://github.com/kayambi/Taxi_Cab_of_New_York/blob/master/DataSet/Transportation%20project%20work%20in%20%20progress%20.ipynb)
 
 
 ```Python
